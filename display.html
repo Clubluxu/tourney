@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Final Display</title>
+ <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
+
+
+<style>
+#prize-display tr {
+  animation: fadeLeft 1.5s ease-in-out;
+}
+
+#lateReg-row {
+  font-weight: bold;
+  font-size: 20px;
+}
+#lateReg.closed {
+  background-color: darkred !important;
+  color: white !important;
+}
+
+  html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* ป้องกัน scroll ทั้งแนวตั้งและแนวนอน */
+}
+  .container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.top-half {
+  flex-basis: 50vh;
+  max-height: 50vh;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  
+}
+
+.bottom-half {
+  display: flex;
+  width: 100%;
+}
+.bottom-left,
+.bottom-center,
+.bottom-right {
+  flex: 1;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+
+  h1 {
+    font-size: 2em;
+    text-align: center;
+  }
+    body { background: #111; color: #fff; font-family: 'Libre Baskerville', serif; margin: 0; padding: 10px;}
+    h1 { text-align: center; color: gold; margin-bottom: 10px; }
+    h2 { text-align: center; color: #ccc; margin-top: 0; }
+    table { width: 95%; border-collapse: collapse; font-size: 16px; }
+    th, td { padding: 10px; border: 1px solid #444; text-align: center; }
+    th { background: #222; }
+    tr:nth-child(even) { background: #2a2a2a; }
+    
+    #clock-container {
+      text-align: center;
+      padding: 0;
+      color: white;
+      font-family: 'Libre Baskerville', serif;
+    }
+#current-level {
+  font-size: clamp(22px, 3vw, 44px); /* ระดับเลเวล */
+  color: #098a2f;
+  margin-top: 10px;
+}
+
+#blinds {
+  font-size: clamp(20px, 4vw, 60px); /* ตัวเลข blinds */
+  font-weight: bold;
+  color: #098a2f;
+  letter-spacing: 1px;
+  margin-top: 20px;
+}
+
+#countdown {
+  font-size: clamp(40px, 10vw, 120px); /* นาฬิกาใหญ่สุด */
+  font-weight: bold;
+  color: gold;
+  margin-top: 30px;
+  
+}
+
+#next-level {
+  font-size: clamp(16px, 2.5vw, 36px); /* ข้อมูล next blinds */
+  color: #aaa;
+}
+
+#clock-container > div:nth-child(2) {
+  font-size: clamp(12px, 1.5vw, 24px); /* SB/BB/ANTE label */
+}
+
+
+.column-left table {
+  border-collapse: collapse;
+}
+
+.column-left td {
+  border: none !important;
+  padding: 6px; /* หรือปรับตามต้องการ */
+}
+
+
+.column-left {
+width: 23%;
+display: flex;
+align-items: center;
+justify-content: center;
+
+}
+
+.column-center {
+  width: 54%;
+ border: 2px solid gold;
+  box-shadow: 0 0 10px gold, 0 0 20px gold;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.column-right {
+  width: 23%;
+  
+}
+
+#tableBody tr {
+  display: none;
+  font-size: 18px;
+}
+
+#tableBody tr.show {
+  display: table-row;
+  animation: fadeLeft 1.5s ease-in-out;
+}
+
+@keyframes fadeLeft {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 7; transform: translateX(0); }
+}
+
+#prize-display tr.show {
+  display: table-row;
+  animation: fadeLeft 1.5s ease-in-out;
+  
+}
+#prize-display tr {
+  display: table-row;
+  animation: fadeLeft 1.5s ease-in-out;
+  font-size: 18px;
+}
+#structure-display {
+  font-size: clamp(16px, 0.9vw, 32px); 
+
+}
+.fade-left {
+  opacity: 0;
+  transform: translateX(18px);
+  transition: all 1.2s ease;
+}
+
+.fade-left.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+
+  </style>
+</head>
+
+<body>
+  <audio id="dingSound" src="ding.mp3" preload="auto"></audio>
+  <audio id="tickSound" src="tick.mp3" preload="auto"></audio>
+  <audio id="gunSound" src="gun.MP3" preload="auto"></audio>
+
+  <button id="fullscreenBtn" style="position:fixed;top:10px;right:10px;z-index:999;padding:8px 8px;cursor:pointer;">
+  ⛶
+</button>
+
+<div class="container">
+
+  <h1 id="pageTitle" style="margin-top: 10px;">🏆 Tournament: Loading...</h1>
+  <div id="datetime" style="text-align:center; font-size:18px; color:#f0ebeb; margin-top:-10px;"></div>
+
+<div class="top-half">
+
+  <div class="column-left" style="margin-right: 20px;">  
+    <table >
+    <thead>
+      <tr>
+        <td><img src="luxu-logo.png" width="60%"></td>        
+      </tr>
+      <tr>
+  <td id="elapsed-time">Elapsed Time : 00:00</td>
+</tr>
+      <tr>
+        <td style="font-weight: bold;font-size: 20px;color: #098a2f;">Registration</td>   
+      </tr>
+  
+  <tr>
+  <td id="lateReg" >
+    <span id="lateReg-row" style="font-size: 20px;">00:00</span>
+  </td>
+</tr>
+
+  <tr>
+  <td id="nextBreak">
+  <span id="nextBreak-row">00:00</span>
+  </td>
+  </tr>      
+    </thead>
+  </table>
+</div>
+
+  <div class="column-center">
+  <div id="clock-container">  
+  
+  <div id="current-level">LEVEL 1</div>
+
+    <div >SB / BB / ANTE </div>
+    <div id="blinds">100/200/200</div>
+    
+    <div id="countdown">00:00</div>
+    <div id="btncontrol" style="margin-top: -15px;">   
+  <img id="btnFD" src="fd.png" width="16" style="cursor:pointer; margin-right:10px;">
+  <img id="btnPlayPause" src="play.png" width="16" style="cursor:pointer; margin-right:10px;">
+  <img id="btnFF" src="ff.png" width="16" style="cursor:pointer; margin-right:10px;">  
+  <img id="btnReset" src="reset.png" width="16" style="cursor:pointer;">  
+  </div>    
+    <div id="next-level">Next : SB 200 / BB 400 / ANTE 400</div>
+    </div>
+    <div id="ko-display" style="font-size: 14px; max-height: 200px; overflow-y: auto;"></div>
+  </div>
+
+  
+
+  <div class="column-right">
+    <div style="font-size: 30px;text-align: center;margin-bottom: 15px;color: gold;">Blinds Structure</div>
+  <div id="structure-display" class="structure-display" style="max-height: 75%;text-align: center;width: 97%;margin-left: 15px;"></div>
+  </div>
+
+</div>
+
+
+  <div class="bottom-half" style="margin-top: 10px;">
+    
+    <div class="bottom-left" style="margin-left: 20px;">
+<div style="text-align:center;font-size: 2em;color: gold;">Player remaining</div>
+    <table>      
+    <tbody id="tableBody" style="text-align:center;font-size: 1.8em;letter-spacing: 3px;"></tbody>
+  </table>
+  </div>
+  
+
+   <div class="bottom-center" style="margin-right: 25px;">
+    <div style="text-align: center;font-size: 2em;color: gold;">Pay Outs</div>
+  <div id="prize-display" style="text-align: center;letter-spacing: 3px;"></div>
+</div>
+    
+    <div class="bottom-right">
+      <div style="text-align: center;font-size: 2em;color: gold;">Tournament state</div>
+      <div>
+      <table style="font-size: 1.2em;letter-spacing: 3px;">
+    <thead>
+      <tr><td><span id="entry-count">Entry : 0</span> | <span id="entry-remaining">0 Remaining</span></td></tr>
+<tr><td id="reentry-count">Re-Entry : 0</td></tr>
+<tr><td id="addon-count">Add-on : 0</td></tr>
+<tr><td id="total-stack">Total Stack : 0</td></tr>
+<tr><td id="avg-stack">Average Stack : 0</td></tr>
+    </thead>    
+  </table>
+    </div>
+    </div>
+  
+  </div>
+
+</div>
+  
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="firebase-init.js"></script>
+  
+  <script>
+
+let checkChampionInterval;
+
+    let lateRegLimit = 0;
+    let lastNotifiedLevel = null; // กันไม่ให้ ding ซ้ำเลเวลเดิม
+
+    const params = new URLSearchParams(window.location.search);
+    const tourName = params.get("tour");
+
+    if (!tourName) {
+      document.body.innerHTML = "<h2 style='color:red;text-align:center;'>❌ เข้าถึงไม่ได้โดยตรง</h2>";
+      throw new Error("Access denied - no tour name provided.");
+    }
+
+    
+    document.getElementById("pageTitle").textContent = `🏆 ${tourName}`;
+
+    firebase.auth().onAuthStateChanged(user => {
+  if (!user) {
+    document.body.innerHTML = "<h2 style='color:red;text-align:center;'>❌ กรุณาเข้าสู่ระบบก่อนเข้าชมข้อมูล</h2>";
+    return;
+  }
+  
+  levelIndex = 0;
+  loadDisplayRealtime();
+  loadStructureFromCollection();  // ✅ ให้ใช้ฟังก์ชันนี้เท่านั้นสำหรับ structure
+  loadTournamentStateFromPlayers();
+  loadPrizePool();
+  loadClockRealtime();
+  calculateLateRegLimit();
+  updateLateRegFromCountdown();
+  loadNewKOLogRealtime();
+});
+
+
+  function loadDisplayRealtime() {
+  const playerRef = firebase.firestore().collection(`tournaments/${tourName}/players`);
+  const infoRef = firebase.firestore().doc(`tournaments/${tourName}`);
+  const tbody = document.getElementById("tableBody");
+
+  let tourType = "tour"; // default
+
+  // โหลดประเภททัวร์จาก Firestore
+  infoRef.onSnapshot(doc => {
+    if (doc.exists) {
+      const data = doc.data();
+      tourType = (data.gameType || "tour").toLowerCase(); // ใช้ field gameType
+    }
+  });
+
+  playerRef.onSnapshot((snapshot) => {
+    let data = [];
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      d.name = doc.id;
+      data.push(d);
+    });
+
+    // เงื่อนไขการกรองข้อมูลตามประเภททัวร์
+    if (tourType === "tour") {
+      data = data.filter(p => p.status === "Active");
+    } else if (tourType === "bounty") {
+      data = data.filter(p => p.status === "ALIVE");
+      data.sort((a, b) => (b.bounty || 0) - (a.bounty || 0));
+    }
+
+    // สร้างตารางใหม่
+    tbody.innerHTML = "";
+    data.forEach((player) => {
+      const tr = document.createElement("tr");
+
+      if (tourType === "tour") {
+        tr.innerHTML = `
+          <td>${player.name}</td>
+          <td colspan="4">${player.status}</td>
+        `;
+      } else if (tourType === "bounty") {
+        tr.innerHTML = `  
+  
+          <td>${player.name}</td> 
+          <td>${player.bounty?.toFixed(2) || "-"}</td>
+          <td>${player.status}</td>     
+          
+        `;
+      }
+
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+
+
+
+  function loadClockRealtime() {
+  const tourDocRef = firebase.firestore().doc(`tournaments/${tourName}`);
+  const stateRef = firebase.firestore()
+  
+    .collection("tournaments")
+    .doc(tourName)
+    .collection("state")
+    .doc("live");
+  
+
+  // structure ถูกประกาศด้านล่างแล้ว
+
+
+
+
+// ✅ หาข้อมูล level ถัดไป (ที่ไม่ใช่ break)
+function getNextLevelEntry(structure, fromIndex) {
+  for (let i = fromIndex + 1; i < structure.length; i++) {
+    return structure[i]; // ✅ คืนทันทีแม้เป็น break
+  }
+  return null;
+}
+
+stateRef.onSnapshot((docSnap) => {
+  if (docSnap.exists && structure.length) {
+    const state = docSnap.data();
+    levelIndex = state.levelIndex || 0;
+    isRunning = state.isRunning || false;
+    const currentLevel = structure[levelIndex];
+    const duration = (currentLevel?.duration || 0) * 60;
+
+    // หยุด interval เดิม
+    if (window.timerInterval) clearInterval(window.timerInterval);
+
+    if (isRunning && state.startTime) {
+      window.timerInterval = setInterval(() => {
+  const now = Date.now();
+  const elapsed = Math.floor((now - state.startTime) / 1000);
+  secondsLeft = Math.max(0, duration - elapsed);
+
+  updateCountdownUI();
+  updateNextBreakFromCountdown();
+  updateLateRegFromCountdown();
+  updateElapsedTime();
+
+  // 🔔 เตือนทุกวินาทีเมื่อเหลือ 10 วิสุดท้าย
+  if (secondsLeft <= 10 && secondsLeft > 0 && isRunning) {
+    document.getElementById("tickSound").play().catch(() => {});
+  }
+
+  // 🔔 เตือนเมื่อเข้าสู่เลเวลใหม่
+  if (lastNotifiedLevel !== levelIndex) {
+    lastNotifiedLevel = levelIndex;
+    document.getElementById("dingSound").play().catch(() => {});
+  }
+
+  if (secondsLeft === 0 && !window.levelJumped) {
+    window.levelJumped = true;
+    setTimeout(() => {
+      goToNextLevel();
+      window.levelJumped = false;
+    }, 1000);
+  }
+}, 1000);
+
+    } else {
+      // เมื่อหยุด → ใช้ secondsLeft จาก Firebase
+      secondsLeft = state.secondsLeft ?? duration;
+      updateCountdownUI();
+      updateNextBreakFromCountdown();
+      updateLateRegFromCountdown();
+      updateElapsedTime();
+    }
+
+    document.getElementById("btnPlayPause").src = isRunning ? "pause.png" : "play.png";
+    renderStructure(structure);
+    renderLiveBlinds();
+    updateTournamentInfo(state);
+  }
+});
+
+
+}
+
+function updateClock() {
+  // ฟังก์ชันเปล่าเพื่อป้องกัน error
+}
+
+
+    // Fullscreen toggle
+const fsBtn = document.getElementById('fullscreenBtn');
+
+fsBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement) {
+    fsBtn.style.display = "none";
+  } else {
+    fsBtn.style.display = "block";
+  }
+});
+
+function updateDateTime() {
+    const now = new Date();
+    const options = {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    };
+    document.getElementById("datetime").textContent = now.toLocaleString('th-TH', options);
+  }
+
+  setInterval(updateDateTime, 1000);
+  updateDateTime();
+
+// อัปเดตทุกวินาที
+setInterval(updateDateTime, 1000);
+updateDateTime(); // เรียกครั้งแรกทันที
+function handleTourType(type) {
+  console.log("🔍 Tournament Type:", type);
+  // คุณสามารถใช้ type เพื่อปรับ UI ได้ เช่น:
+  // if (type === "bounty") { ... }
+}
+ 
+
+
+
+function loadStructureFromCollection() {
+  return firebase.firestore()
+    .collection("tournaments").doc(tourName)
+    .collection("structure")
+    .orderBy("index")
+    .get()
+    .then((querySnapshot) => {
+      structure = [];
+      querySnapshot.forEach((doc) => {
+        structure.push(doc.data());
+      });
+
+      // หากต้องการตั้งค่า levelIndex จาก state ที่โหลดมาก่อนหน้า ให้ใส่ตรงนี้
+      levelIndex = 0;
+
+      renderStructure(structure);
+      renderLiveBlinds();
+      updateCountdownUI();
+    })
+    .catch((error) => {
+      console.error("Error loading structure:", error);
+    });
+}
+
+
+
+
+
+async function loadTournamentStateFromPlayers() {
+  const tourDocRef = firebase.firestore().doc(`tournaments/${tourName}`);
+  const playersRef = firebase.firestore().collection(`tournaments/${tourName}/players`);
+
+  let startingStack = 0;
+  let addonStack = 0;
+
+  try {
+    const docSnap = await tourDocRef.get();
+    if (docSnap.exists) {
+      const data = docSnap.data();
+      startingStack = Number(data.startingStack || 0);
+      addonStack = Number(data.addonStack || 0);
+    }
+
+    playersRef.onSnapshot((snapshot) => {
+      let entry = 0, rebuy = 0, addon = 0, remaining = 0;
+
+      snapshot.forEach((doc) => {
+        const p = doc.data();
+        entry++;
+        if (p.status === "Active" || p.status === "ALIVE") remaining++;
+        if (p.reBuyCount) rebuy += p.reBuyCount;
+        if (p.rebuyUsed) rebuy += p.rebuyUsed;
+        if (p.addonUsed) addon++;
+      });
+
+      const totalStack = (entry + rebuy) * startingStack + addon * addonStack;
+      const avgStack = remaining > 0 ? Math.floor(totalStack / remaining) : 0;
+
+      document.getElementById("entry-count").innerText = `Entry : ${entry}`;
+      document.getElementById("entry-remaining").innerText = `${remaining} Remaining`;
+      document.getElementById("reentry-count").innerText = `Re-Entry : ${rebuy}`;
+      document.getElementById("addon-count").innerText = `Add-on : ${addon}`;
+      document.getElementById("total-stack").innerText = `Total Stack : ${totalStack}`;
+      document.getElementById("avg-stack").innerText = `Average Stack : ${avgStack}`;
+
+      console.log("🎯 Tournament State:", { entry, rebuy, addon, totalStack, avgStack });
+    });
+
+  } catch (error) {
+    console.error("❌ Error loading tournament state:", error);
+  }
+}
+
+let currentPage = 0;
+const rowsPerPage = 6;
+
+function paginateTable() {
+  const rows = document.querySelectorAll('#tableBody tr');
+  rows.forEach((row, index) => {
+    row.classList.remove('show');
+    if (index >= currentPage * rowsPerPage && index < (currentPage + 1) * rowsPerPage) {
+      row.classList.add('show');
+    }
+  });
+
+  currentPage++;
+  if (currentPage * rowsPerPage >= rows.length) currentPage = 0;
+}
+
+setInterval(paginateTable, 10000); // หมุนหน้าทุก 10 วินาที
+
+function loadPrizePool() {
+  const poolRef = firebase.firestore().collection(`tournaments/${tourName}/prizepool`);
+  const display = document.getElementById("prize-display");
+  if (!display) return;
+
+  let prizeData = [];
+  let currentIndex = 0;
+  const rowsPerPage = 5;
+  let prizeInterval = null;  // ✅ เก็บ interval ไว้เพื่อล้างรอบเก่า
+
+  poolRef.orderBy("rank").onSnapshot(snapshot => {
+    prizeData = [];
+    snapshot.forEach(doc => {
+      const { rank, amount } = doc.data();
+      prizeData.push({ rank, amount });
+    });
+
+    renderPrizePage();
+
+    if (prizeInterval) clearInterval(prizeInterval);  // ✅ เคลียร์รอบก่อนหน้า
+    prizeInterval = setInterval(renderPrizePage, 10000); // ✅ สลับหน้าใหม่ทุก 10 วินาที
+  });
+
+  function renderPrizePage() {
+    let html = `
+      <table style="width: 100%; font-size: 16px; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="padding: 8px; border-bottom: 1px solid #555;">Rank</th>
+            <th style="padding: 8px; border-bottom: 1px solid #555;">Prize</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    const pageData = prizeData.slice(currentIndex, currentIndex + rowsPerPage);
+
+    pageData.forEach(item => {
+      html += `
+        <tr class="fade-left show">
+          <td style="padding: 8px; text-align: center;">${item.rank}</td>
+          <td style="padding: 8px; text-align: right;">${item.amount}</td>
+        </tr>
+      `;
+    });
+
+    html += "</tbody></table>";
+    display.innerHTML = html;
+
+    currentIndex += rowsPerPage;
+    if (currentIndex >= prizeData.length) currentIndex = 0;
+  }
+}
+
+
+// ✅ หาหมายเลข LEVEL จริง โดยไม่นับ break
+
+  function getDisplayLevelNumber(index) {
+      let count = 0;
+      for (let i = 0; i <= index; i++) {
+        if (!structure[i].isBreak && structure[i].type !== 'break') count++;
+      }
+      return count;
+    }
+
+    function getNextLevelEntry() {
+      let nextIndex = levelIndex + 1;
+      while (nextIndex < structure.length && (structure[nextIndex].type === 'break' || structure[nextIndex].isBreak)) {
+        nextIndex++;
+      }
+      return structure[nextIndex] || null;
+    }
+
+function countRealLevelNumber(structure, currentIndex) {
+      return structure.slice(0, currentIndex + 1).filter(lv => lv.type !== 'break' && !lv.isBreak).length;
+    }
+
+ 
+  function renderLiveBlinds() {
+  if (!structure.length) return;
+
+  const currentLevelDisplay = document.getElementById("current-level");
+  const blindsDiv = document.getElementById("blinds");
+  const nextDiv = document.getElementById("next-level");
+
+  const current = structure[levelIndex];
+  const next = structure[levelIndex + 1];
+  const realLevelNumber = countRealLevelNumber(structure, levelIndex);
+
+  if (current?.isBreak || current?.type === 'break') {
+    currentLevelDisplay.textContent = `🛑 BREAK`;
+    blindsDiv.innerHTML = `<span style="color:#ff9999;">${current.note || 'Break Time'}</span> (${current.duration || '-'} min)`;
+  } else {
+    currentLevelDisplay.textContent = `LEVEL ${realLevelNumber}`;
+    blindsDiv.textContent = `${current.sb || '-'} / ${current.bb || '-'} / ${current.ante || '-'}`;
+  }
+
+  if (!next) {
+    nextDiv.textContent = `Final Level`;
+  } else if (next?.isBreak || next?.type === 'break') {
+    nextDiv.innerHTML = `Next : <span style="color:#ff9999;">${next.note || 'Break'}</span> (${next.duration || '-'} min)`;
+  } else {
+    nextDiv.textContent = `Next : ${next.sb || '-'} / ${next.bb || '-'} / ${next.ante || '-'}`;
+    nextDiv.style.color = "#fff";
+  }
+}
+
+
+
+
+let structure = [];
+let levelIndex = 0;
+let countdownInterval = null;
+let secondsLeft = 0;
+
+
+
+function updateCountdownUI() {
+  
+  const countdownEl = document.getElementById("countdown");
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  countdownEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  
+}
+
+const container = document.getElementById("structure-display");
+
+function renderStructure(structure = []) {
+  container.innerHTML = "";
+  let levelCounter = 0;
+
+  structure.forEach((level, index) => {
+    const isBreak = level.type === 'break' || level.isBreak;
+    const item = document.createElement("div");
+    item.className = "level-item";
+    item.style.padding = "3px 8px";      // ✅ ปรับ padding ให้สวย
+
+
+    if (!isBreak) levelCounter++;
+
+    // ✅ ไฮไลต์ปัจจุบัน
+    if (index === levelIndex) {
+      item.style.backgroundColor = "#555";
+      item.style.color = "gold";
+      item.style.fontWeight = "bold";
+    }
+
+    // ✅ ซ่อนไปแล้ว
+    if (index < levelIndex) {
+      item.style.display = "none";
+    }
+
+    // ✅ BREAK note และ LEVEL แยกแสดง
+    item.innerHTML = isBreak
+      ? `<strong><img src="break.png" width="60px"> BREAK (${level.duration || '-'} min)</strong><br><span style="color:#ff9999;">${level.note || ''}</span>`
+      : `Lv. ${levelCounter} : ${level.sb || '-'} | ${level.bb || '-'} | ${level.ante || '-'}`;
+
+    container.appendChild(item);
+  });
+}
+
+
+
+
+
+
+
+let isRunning = false;
+let timerInterval = null;
+
+togglePlayPause = function () {
+  const now = Date.now();
+  const duration = (structure[levelIndex]?.duration || 0) * 60;
+
+  isRunning = !isRunning;
+
+  if (isRunning) {
+    // ▶ Resume → คำนวณ startTime จากเวลาที่เหลือ
+    const calculatedStartTime = now - (duration - secondsLeft) * 1000;
+    saveClockState({ startTime: calculatedStartTime });
+  } else {
+    // ⏸ Pause → เก็บเวลาที่เหลือ
+    saveClockState({ secondsLeft });
+  }
+
+  document.getElementById("btnPlayPause").src = isRunning ? "pause.png" : "play.png";
+};
+
+
+
+function fastForward() {
+  if (levelIndex + 1 < structure.length) {
+    levelIndex++;
+    secondsLeft = (structure[levelIndex].duration || 0) * 60;
+    renderLiveBlinds();
+    updateCountdownUI();
+    saveClockState();
+  }
+}
+
+function fastBackward() {
+  if (levelIndex > 0) {
+    levelIndex--;
+    secondsLeft = (structure[levelIndex].duration || 0) * 60;
+    renderLiveBlinds();
+    updateCountdownUI();
+    saveClockState();
+  }
+}
+
+function resetClock() {
+  isRunning = false;
+  levelIndex = 0;
+  secondsLeft = (structure[0].duration || 0) * 60;
+  renderLiveBlinds();
+  updateCountdownUI();
+  document.getElementById("btnPlayPause").src = "play.png";
+  saveClockState();
+}
+
+function saveClockState(overrides = {}) {
+  const now = Date.now();
+  const stateData = {
+    levelIndex,
+    isRunning,
+    updatedAt: now,
+    ...overrides
+  };
+
+  if (isRunning && !stateData.startTime) {
+    const duration = (structure[levelIndex]?.duration || 0) * 60;
+    stateData.startTime = now - (duration - secondsLeft) * 1000;
+    delete stateData.secondsLeft;
+  }
+
+  if (!isRunning && typeof stateData.secondsLeft !== 'number') {
+    stateData.secondsLeft = secondsLeft;
+    delete stateData.startTime;
+  }
+
+  firebase.firestore()
+    .collection("tournaments").doc(tourName)
+    .collection("state").doc("live")
+    .set(stateData, { merge: true });
+}
+
+
+
+
+
+
+function updateTournamentInfo(state) {
+  // สามารถขยายเพิ่มเติมได้ตามต้องการ
+  console.log("🧠 updateTournamentInfo:", state);
+}
+
+// bind ปุ่ม
+
+document.getElementById("btnPlayPause").onclick = togglePlayPause;
+document.getElementById("btnFF").onclick = fastForward;
+document.getElementById("btnFD").onclick = fastBackward;
+document.getElementById("btnReset").onclick = resetClock;
+
+
+function updateElapsedTime() {
+  let totalSeconds = 0;
+  for (let i = 0; i < levelIndex; i++) {
+    totalSeconds += (structure[i].duration || 0) * 60;
+  }
+
+  const elapsed = (structure[levelIndex]?.duration || 0) * 60 - secondsLeft;
+  totalSeconds += elapsed;
+
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  const formatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  document.getElementById("elapsed-time").textContent = `Elapsed Time : ${formatted}`;
+}
+
+
+function calculateLateRegLimit() {
+  let total = 0;
+  for (let i = 0; i < structure.length; i++) {
+    const lv = structure[i];
+    total += Number(lv.duration || 0) * 60;
+    if (lv.type === 'break' || lv.isBreak) break;
+  }
+  lateRegLimit = total;
+}
+
+function updateLateRegFromCountdown() {
+  if (structure.length === 0 || levelIndex === null || secondsLeft === null) return;
+  let totalSecondsPassed = 0;
+  for (let i = 0; i < levelIndex; i++) {
+    totalSecondsPassed += (structure[i]?.duration || 0) * 60;
+  }
+  totalSecondsPassed += ((structure[levelIndex]?.duration || 0) * 60 - secondsLeft);
+
+  
+  const remaining = lateRegLimit - totalSecondsPassed;
+  const span = document.getElementById("lateReg-row");
+  const td = document.getElementById("lateReg");
+
+  if (!span || !td) return;
+
+  if (remaining <= 0) {
+  span.textContent = "CLOSED";
+  td.style.backgroundColor = "darkred";
+  td.style.color = "white";
+} else {
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  span.textContent = `ON : ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  td.style.backgroundColor = "#006400"; // เขียวเข้ม
+  td.style.color = "white";
+}
+}
+function updateNextBreakFromCountdown() {
+  if (structure.length === 0 || levelIndex === null || secondsLeft === null) return;
+  const span = document.getElementById("nextBreak-row");
+  const td = document.getElementById("nextBreak");
+  if (!span || !td) return;
+
+  const current = structure[levelIndex];
+  if (current.type === 'break' || current.isBreak) {
+    const dur = current.duration || 0;
+    span.textContent = `Breaking ${dur} min`;
+    td.style.backgroundColor = "#ffe08a";
+    td.style.color = "#000";
+    return;
+  }
+
+  let secondsUntilBreak = 0;
+  let foundBreak = false;
+
+  for (let i = levelIndex; i < structure.length; i++) {
+    const lv = structure[i];
+    if (lv.type === 'break' || lv.isBreak) {
+      foundBreak = true;
+      break;
+    }
+    if (i === levelIndex) {
+      secondsUntilBreak += secondsLeft;
+    } else {
+      secondsUntilBreak += (lv.duration || 0) * 60;
+    }
+  }
+
+  if (!foundBreak) {
+    span.textContent = "No Break";
+    td.style.backgroundColor = "#ccc";
+    td.style.color = "#000";
+  } else if (secondsUntilBreak <= 0) {
+    span.textContent = "00:00";
+  } else {
+  const m = Math.floor(secondsUntilBreak / 60);
+  const s = secondsUntilBreak % 60;
+  span.textContent = `🐇 Next Break : ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  td.style.backgroundColor = "";
+  td.style.color = "";
+}
+}
+function loadStateRealtime(tourName) {
+  const stateRef = db.doc(`tournaments/${tourName}/display/state`);
+  stateRef.onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      levelIndex = data.levelIndex;
+      secondsLeft = data.secondsLeft;
+      isRunning = data.isRunning;
+
+      updateCountdownUI();
+      updateLateRegFromCountdown();
+      updateNextBreakFromCountdown();
+    }
+  });
+}
+
+if (tourName) {
+  loadStructureRealtime(tourName);
+  loadStateRealtime(tourName);  // ✅ ใส่บรรทัดนี้เพิ่ม
+}
+
+
+// loadStructureFromCollection()
+calculateLateRegLimit();
+updateLateRegFromCountdown();
+updateNextBreakFromCountdown();
+
+// loadClockRealtime() -> onSnapshot()
+updateCountdownUI();
+updateLateRegFromCountdown();
+updateNextBreakFromCountdown();
+
+function loadStructureRealtime(tourName) {
+  const structureRef = firebase.firestore().collection(`tournaments/${tourName}/structure`);
+
+  structureRef.orderBy("index").onSnapshot(snapshot => {
+    const all = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.isBreak === true) data.type = 'break';
+      all.push({ ...data, id: doc.id });
+    });
+
+    structure = all;
+
+    // เรียกทุกการแสดงผลที่จำเป็น
+    calculateLateRegLimit();
+    updateLateRegFromCountdown();
+    updateNextBreakFromCountdown();
+    renderStructure(structure);
+    renderLiveBlinds();
+    updateCountdownUI();
+  });
+}
+
+
+
+function loadKOlogRealtime() {
+  const koRef = firebase.firestore().collection(`tournaments/${tourName}/KOlog`);
+  const display = document.getElementById("ko-display");
+  if (!display) return;
+
+  koRef.orderBy("time", "desc").limit(20).onSnapshot(snapshot => {
+    let html = "<ul style='list-style:none; padding:0;'>";
+    snapshot.forEach(doc => {
+      const { winner, loser, bountyEarned, time } = doc.data();
+      const date = time?.toDate().toLocaleTimeString() || "";
+      html += `
+        <li style="margin-bottom: 8px;">
+          <strong>${winner}</strong> KO <strong>${loser}</strong>
+          for <span style="color:gold;">฿${bountyEarned?.toFixed(2) || "-"}</span>
+          <div style="font-size: 12px; color: gray;">${date}</div>
+        </li>
+      `;
+    });
+    html += "</ul>";
+    display.innerHTML = html;
+  });
+}
+  let lastKOId = null;
+
+function loadNewKOLogRealtime() {
+  const logsRef = firebase.firestore()
+    .collection(`tournaments/${tourName}/logs`)
+    .where("type", "==", "KO")
+    .orderBy("time", "desc")
+    .limit(1);
+
+  logsRef.onSnapshot(snapshot => {
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      if (doc.id !== lastKOId) {
+        lastKOId = doc.id;
+        const data = doc.data();
+        showKONotification(data.playerA, data.playerB, data.bounty);
+      }
+    }
+  });
+}
+
+
+function showKONotification(playerA, playerB, bounty) {
+  const box = document.createElement("div");
+
+  box.innerHTML = `
+    <div style="font-size: 60px;">${playerA} ⚔️ ${playerB}</div>
+    <div style="font-size: 40px; margin-top: 10px;">GET ${bounty} 💰</div>
+  `;
+  box.style.position = "fixed";
+  box.style.top = "70%";
+  box.style.left = "50%";
+  box.style.transform = "translate(-50%, -50%)";
+  box.style.background = "#222";
+  box.style.color = "#fff";
+  box.style.padding = "20px 40px";
+  box.style.borderRadius = "15px";
+  box.style.zIndex = "9999";
+  box.style.boxShadow = "0 2px 12px rgba(0,0,0,0.6)";
+  box.style.textAlign = "center";
+  document.body.appendChild(box);
+
+  // 🔫 เล่น gun.mp3 2 ครั้ง
+  const gun = document.getElementById("gunSound");
+  gun.play().catch(() => {});
+  setTimeout(() => gun.play().catch(() => {}), 300); // เว้นช่วง 300ms
+
+  setTimeout(() => {
+    box.remove();
+  }, 10000);
+}
+
+function startRealtimeCountdownSync(state) {
+  if (window.liveCountdownInterval) clearInterval(window.liveCountdownInterval);
+
+  window.liveCountdownInterval = setInterval(() => {
+    const now = Date.now();
+    const elapsed = state.startTime ? Math.floor((now - state.startTime) / 1000) : 0;
+    const duration = (structure[levelIndex]?.duration || 0) * 60;
+    secondsLeft = Math.max(0, duration - elapsed);
+    
+    updateCountdownUI();
+    updateNextBreakFromCountdown();
+    updateLateRegFromCountdown();
+    updateElapsedTime();
+  }, 1000);
+}
+function goToNextLevel() {
+  const stateRef = firebase.firestore()
+    .collection("tournaments")
+    .doc(tourName)
+    .collection("state")
+    .doc("live");
+
+  levelIndex++; // เพิ่ม level ไปขั้นถัดไป
+
+  stateRef.set({
+    levelIndex,
+    startTime: Date.now(),
+    isRunning: true
+  }, { merge: true })
+  .then(() => {
+    console.log("⏭️ เลื่อนไปเลเวลถัดไป:", levelIndex);
+  })
+  .catch((err) => {
+    console.error("❌ ไม่สามารถเลื่อนไปเลเวลถัดไปได้:", err);
+  });
+}
+
+function showChampionScreen(tour, name) {
+  clearInterval(countdownInterval);
+  clearInterval(checkChampionInterval);
+
+  document.body.innerHTML = `
+    <div style="height: 100vh; background-color: black; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'Saira', sans-serif;">
+      <h1 style="font-size: 100px; color: gold; text-shadow: 2px 2px 15px white;">🏆 CHAMPION 🏆</h1>
+      <h2 style="font-size: 60px; color: white;">${name}</h2>
+      <p style="font-size: 26px; color: #ccc;">Tournament: ${tour}</p>
+    </div>
+  `;
+}
+
+
+async function checkChampion() {
+  try {
+    const snap = await db.collection("tournaments").doc(tourName).collection("players").get();
+
+    const allPlayers = snap.docs.map(doc => ({
+      ...doc.data(),
+      id: doc.id  // ใช้ชื่อจาก document ID
+    }));
+
+    const remaining = allPlayers.filter(p => {
+  const status = (p.status || "").toLowerCase();
+  return status === "active" || status === "alive";
+});
+
+
+    if (remaining.length === 1 && allPlayers.length >= 2) {
+      const p = remaining[0];
+      const winner = p.name || p.player || p.nickname || p.displayName || p.id || "Unknown";
+      showChampionScreen(tourName, winner);
+    }
+  } catch (e) {
+    console.error("❌ Error checking champion:", e);
+  }
+}
+  setInterval(checkChampion, 5000);
+
+
+</script>
+</body>
+</html>
