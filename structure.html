@@ -2,7 +2,6 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="favicon.png" type="image/png">
   <title>Structure Setting</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -189,8 +188,18 @@ table {
   <button onclick="insertBreak()">+BREAK</button>
   <div class="add-button">
   <button onclick="saveToFirestore()">💾 Save for tour</button>
+  <button onclick="saveTemplate()">💾 Save as Template</button>
+  <button onclick="showTemplateList()">📂 Load Template</button>
+  </div>
 </div>
+<div id="templatePopup" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:1px solid #ccc; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.2); z-index:1000;">
+  <h3>เลือกแม่แบบ:</h3>
+  <div id="templateListArea" style="max-height:300px; overflow-y:auto;"></div>
+  <br><br>
+  <button onclick="loadSelectedTemplate()">✅ Load</button>
+  <button onclick="closeTemplatePopup()">❌ Cancel</button>
 </div>
+
 </div>
 
 <script>
@@ -502,10 +511,146 @@ async function clearStructure() {
   alert("🧹 ลบ structure เก่าทั้งหมดแล้ว");
 }
 
+function isValidTemplateName(name) {
+  return typeof name === 'string' &&
+         name.trim().length > 0 &&
+         !/[\/\\.#$\[\]]/.test(name);
+}
+async function saveTemplate() {
+  const templateName = prompt(
+  "📌 ตั้งชื่อแม่แบบ Structure:\n(ห้ามใช้: / \\ . # $ [ ])"
+);
+
+if (!isValidTemplateName(templateName)) {
+  alert("❌ ชื่อแม่แบบไม่ถูกต้อง: ห้ามมี / \\ . # $ [ ]");
+  return;
+}
+
+  if (!templateName) return;
+
+  const rows = document.querySelectorAll("#structure-body tr");
+  const structure = Array.from(rows).map(row => {
+    const noteInput = row.querySelector(".note-input");
+    if (noteInput) {
+      return {
+        isBreak: true,
+        note: noteInput.value || '',
+        duration: row.querySelector("input[placeholder='duration']")?.value || '',
+        time: row.querySelector("input[placeholder='time']")?.value || ''
+      };
+    } else {
+      return {
+        sb: row.querySelector("input[placeholder='sb']")?.value || '',
+        bb: row.querySelector("input[placeholder='bb']")?.value || '',
+        ante: row.querySelector("input[placeholder='ante']")?.value || '',
+        duration: row.querySelector("input[placeholder='duration']")?.value || '',
+        time: row.querySelector("input[placeholder='time']")?.value || ''
+      };
+    }
+  });
+
+  await firebase.firestore().collection("structureTemplates").doc(templateName).set({
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    structure
+  });
+  
+
+  alert(`✅ บันทึกแม่แบบ "${templateName}" แล้ว`);
+}
+
+async function loadTemplate(templateName) {
+  const doc = await firebase.firestore().collection("structureTemplates").doc(templateName).get();
+  if (!doc.exists) return alert("❌ ไม่พบแม่แบบ");
+
+  const { structure } = doc.data();
+  document.getElementById("structure-body").innerHTML = "";
+  structure.forEach(data => addRow(data));
+
+  updateLVNumbers();
+  updateTimeColumn();
+}
+
+async function showTemplateList() {
+  const popup = document.getElementById("templatePopup");
+  const listArea = document.getElementById("templateListArea");
+
+  listArea.innerHTML = "<table style='width:100%; border-collapse: collapse;'><thead><tr><th style='text-align:left;'>ชื่อแม่แบบ</th><th>จัดการ</th></tr></thead><tbody></tbody></table>";
+  const tbody = listArea.querySelector("tbody");
+
+  const snapshot = await firebase.firestore().collection("structureTemplates").orderBy("createdAt", "desc").get();
+  snapshot.forEach(doc => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${doc.id}</td>
+      <td>
+        <button onclick="loadTemplateByName('${doc.id}')">✅ โหลด</button>
+        <button onclick="renameTemplate('${doc.id}')">✏️ แก้ชื่อ</button>
+        <button onclick="deleteTemplate('${doc.id}')">🗑️ ลบ</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  popup.style.display = "block";
+}
 
 
+function closeTemplatePopup() {
+  document.getElementById("templatePopup").style.display = "none";
+}
 
+async function loadSelectedTemplate() {
+  const selector = document.getElementById("templateSelector");
+  const templateName = selector.value;
+  if (!templateName) return;
 
+  const doc = await firebase.firestore().collection("structureTemplates").doc(templateName).get();
+  if (!doc.exists) return alert("❌ ไม่พบแม่แบบ");
+
+  const { structure } = doc.data();
+  document.getElementById("structure-body").innerHTML = "";
+  structure.forEach(data => addRow(data));
+
+  updateLVNumbers();
+  updateTimeColumn();
+  closeTemplatePopup();
+}
+async function loadTemplateByName(name) {
+  const doc = await firebase.firestore().collection("structureTemplates").doc(name).get();
+  if (!doc.exists) return alert("❌ ไม่พบแม่แบบ");
+
+  const { structure } = doc.data();
+  document.getElementById("structure-body").innerHTML = "";
+  structure.forEach(data => addRow(data));
+  updateLVNumbers();
+  updateTimeColumn();
+  closeTemplatePopup();
+}
+async function deleteTemplate(name) {
+  if (!confirm(`คุณแน่ใจว่าต้องการลบแม่แบบ "${name}"?`)) return;
+  await firebase.firestore().collection("structureTemplates").doc(name).delete();
+  alert("🗑️ ลบแม่แบบแล้ว");
+  showTemplateList(); // รีเฟรชรายการ
+}
+async function renameTemplate(oldName) {
+  const newName = prompt("📌 ใส่ชื่อใหม่:", oldName);
+  if (!newName || newName === oldName) return;
+  if (!isValidTemplateName(newName)) {
+  alert("❌ ชื่อใหม่ไม่ถูกต้อง: ห้ามมี / \\ . # $ [ ]");
+  return;
+}
+
+  const ref = firebase.firestore().collection("structureTemplates");
+  const oldDoc = await ref.doc(oldName).get();
+  if (!oldDoc.exists) return alert("❌ ไม่พบแม่แบบเดิม");
+
+  const data = oldDoc.data();
+  await ref.doc(newName).set(data);
+  await ref.doc(oldName).delete();
+
+  alert("✏️ เปลี่ยนชื่อแล้ว");
+  showTemplateList(); // รีเฟรชรายการ
+}
 
 </script>
 
