@@ -105,10 +105,14 @@
         const info = d.info || {};
         const state = d.finalState || {};
         const rankIcons = ['🏆', '🥈', '🥉'];
+const rankColors = ['#e1b12c', '#7f8fa6', '#e84118'];
+
 const winners = (d.winners || []).map(w => {
   const icon = rankIcons[w.rank - 1] || `#${w.rank}`;
-  return `${icon} ${w.name} (${w.prize})`;
-}).join("<br>");
+  const color = rankColors[w.rank - 1] || '#333';
+  return `<div style="font-weight:bold; color:${color}; font-size:14px;">${icon} ${w.name} <span style="color:gray;">(${w.prize})</span></div>`;
+}).join("");
+
 
 
         const row = document.createElement("tr");
