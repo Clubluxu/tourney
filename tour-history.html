@@ -2,7 +2,6 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="favicon.png" type="image/png">
   <title>📜 Tour History</title>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -105,7 +104,12 @@
         const date = d.finishedAt?.toDate?.().toLocaleDateString("th-TH") || "-";
         const info = d.info || {};
         const state = d.finalState || {};
-        const winners = (d.winners || []).map(w => `${w.rank}. ${w.name} (${w.prize})`).join("<br>");
+        const rankIcons = ['🏆', '🥈', '🥉'];
+const winners = (d.winners || []).map(w => {
+  const icon = rankIcons[w.rank - 1] || `#${w.rank}`;
+  return `${icon} ${w.name} (${w.prize})`;
+}).join("<br>");
+
 
         const row = document.createElement("tr");
         row.innerHTML = `
