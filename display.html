@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="favicon.png" type="image/png">
   <title>Final Display</title>
  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
 
@@ -67,37 +66,32 @@
     th { background: #222; }
     tr:nth-child(even) { background: #2a2a2a; }
     
-    #clock-container {
+#clock-container {
       text-align: center;
       padding: 0;
       color: white;
       font-family: 'Libre Baskerville', serif;
-    }
+}
 #current-level {
-  font-size: clamp(22px, 3vw, 44px); /* ระดับเลเวล */
+  font-size: clamp(22px, 2.8vw, 50px); /* ระดับเลเวล */
   color: #098a2f;
   margin-top: 10px;
 }
 
-#blinds {
-  font-size: clamp(20px, 4vw, 60px); /* ตัวเลข blinds */
-  font-weight: bold;
-  color: #098a2f;
-  letter-spacing: 1px;
-  margin-top: 20px;
+#countdown {
+  font-size: clamp(60px, 12vw, 100px);
+  color: #c7a13a;
 }
 
-#countdown {
-  font-size: clamp(40px, 10vw, 120px); /* นาฬิกาใหญ่สุด */
-  font-weight: bold;
-  color: gold;
-  margin-top: 30px;
-  
+#blinds {
+  font-size: clamp(30px, 4vw, 60px);
+  color: #098a2f;
 }
 
 #next-level {
-  font-size: clamp(16px, 2.5vw, 36px); /* ข้อมูล next blinds */
-  color: #aaa;
+  font-size: clamp(25px, 3vw, 50px);
+  
+  
 }
 
 #clock-container > div:nth-child(2) {
@@ -230,10 +224,10 @@ justify-content: center;
   <div id="current-level">LEVEL 1</div>
 
     <div >SB / BB / ANTE </div>
-    <div id="blinds">100/200/200</div>
-    
-    <div id="countdown">00:00</div>
-    <div id="btncontrol" style="margin-top: -15px;">   
+    <div id="blinds" style="margin-top: 5px;">100/200/200</div>
+    <div style="font-size: clamp(18px, 1.5vw, 25px);">Next level in</div>
+    <div id="countdown" style="margin-top: 10px;">00:00</div>
+    <div id="btncontrol">   
   <img id="btnFD" src="fd.png" width="16" style="cursor:pointer; margin-right:10px;">
   <img id="btnPlayPause" src="play.png" width="16" style="cursor:pointer; margin-right:10px;">
   <img id="btnFF" src="ff.png" width="16" style="cursor:pointer; margin-right:10px;">  
@@ -690,7 +684,7 @@ function countRealLevelNumber(structure, currentIndex) {
     }
 
  
-  function renderLiveBlinds() {
+function renderLiveBlinds() {
   if (!structure.length) return;
 
   const currentLevelDisplay = document.getElementById("current-level");
@@ -701,25 +695,27 @@ function countRealLevelNumber(structure, currentIndex) {
   const next = structure[levelIndex + 1];
   const realLevelNumber = countRealLevelNumber(structure, levelIndex);
 
+  // แสดงเลเวลปัจจุบัน
   if (current?.isBreak || current?.type === 'break') {
     currentLevelDisplay.textContent = `🛑 BREAK`;
-    blindsDiv.innerHTML = `<span style="color:#ff9999;">${current.note || 'Break Time'}</span> (${current.duration || '-'} min)`;
+    blindsDiv.innerHTML = `<span style="color:#ff9999;">${current.note || 'Break Time'}</span>`;
   } else {
-    currentLevelDisplay.textContent = `LEVEL ${realLevelNumber}`;
+    currentLevelDisplay.textContent = `Current LV. ${realLevelNumber}`;
     blindsDiv.textContent = `${current.sb || '-'} / ${current.bb || '-'} / ${current.ante || '-'}`;
   }
 
+  // แสดงเลเวลถัดไป
   if (!next) {
     nextDiv.textContent = `Final Level`;
+    nextDiv.style.color = "#CC3333";
   } else if (next?.isBreak || next?.type === 'break') {
-    nextDiv.innerHTML = `Next : <span style="color:#ff9999;">${next.note || 'Break'}</span> (${next.duration || '-'} min)`;
+    nextDiv.innerHTML = `<span style="color:#ff9999;">${next.note || 'Break'}</span> ${next.duration || '-'} min`;
+    nextDiv.style.color = "#ff9999";
   } else {
-    nextDiv.textContent = `Next : ${next.sb || '-'} / ${next.bb || '-'} / ${next.ante || '-'}`;
-    nextDiv.style.color = "#fff";
+    nextDiv.textContent = `${next.sb || '-'} / ${next.bb || '-'} / ${next.ante || '-'}`;
+    nextDiv.style.color = "#4682B4";
   }
 }
-
-
 
 
 let structure = [];
